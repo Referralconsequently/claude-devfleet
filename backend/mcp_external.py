@@ -548,7 +548,7 @@ async def _cancel_mission(args: dict, conn) -> dict:
 
     # Find running session
     cur = await conn.execute(
-        "SELECT id, pid FROM agent_sessions WHERE mission_id = ? AND status = 'running' ORDER BY started_at DESC LIMIT 1",
+        "SELECT id FROM agent_sessions WHERE mission_id = ? AND status = 'running' ORDER BY started_at DESC LIMIT 1",
         (mid,),
     )
     session = await cur.fetchone()
@@ -558,20 +558,17 @@ async def _cancel_mission(args: dict, conn) -> dict:
     session = dict(session)
     sid = session["id"]
 
-    # Try to cancel the process
+    # Try to cancel the in-memory task; sdk_engine also handles orphaned
+    # running sessions after backend restarts.
     try:
         from sdk_engine import cancel_session
-        await cancel_session(sid)
+        cancelled = await cancel_session(sid)
     except Exception as e:
         log.warning(f"cancel_session failed for {sid}: {e}")
-        # Fallback: kill PID if available
-        pid = session.get("pid")
-        if pid:
-            try:
-                import signal
-                os.kill(pid, signal.SIGTERM)
-            except ProcessLookupError:
-                pass
+        cancelled = False
+
+    if not cancelled:
+        return {"error": f"Session {sid} is not running"}
 
     # Update status
     await conn.execute("UPDATE agent_sessions SET status = 'cancelled' WHERE id = ?", (sid,))
