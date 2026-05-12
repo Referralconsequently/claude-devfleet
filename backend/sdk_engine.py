@@ -55,7 +55,7 @@ _cl.parse_message = _patched_parse
 import db
 from prompt_template import build_prompt
 from worktree import create_worktree, cleanup_worktree
-from models import TOOL_PRESETS, DispatchOptions
+from models import DEFAULT_MODEL, TOOL_PRESETS, DispatchOptions, normalize_model
 
 log = logging.getLogger("devfleet.sdk_engine")
 
@@ -125,11 +125,11 @@ def _build_sdk_options(
     """Build ClaudeCodeOptions from mission config + dispatch overrides."""
 
     # Model selection: override > mission > default
-    model = "claude-opus-4-6"
+    model = DEFAULT_MODEL
     if opts and opts.model:
-        model = opts.model
+        model = normalize_model(opts.model)
     elif mission.get("model"):
-        model = mission["model"]
+        model = normalize_model(mission["model"])
 
     # Allowed tools: override > preset > mission config > full
     allowed_tools = []
@@ -365,7 +365,7 @@ async def _run_agent(
             resume_session_id=resume_session_id,
             extra_mcp_servers=extra_mcp or None,
         )
-        model_used = sdk_options.model or "claude-opus-4-6"
+        model_used = normalize_model(sdk_options.model, DEFAULT_MODEL)
 
         log.info(
             "SDK dispatch session %s for mission '%s' in %s (model: %s, worktree: %s, resume: %s)",

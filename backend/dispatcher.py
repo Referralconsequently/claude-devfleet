@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 import db
 from prompt_template import build_prompt
 from worktree import create_worktree, cleanup_worktree, is_git_repo
-from models import TOOL_PRESETS, DispatchOptions
+from models import DEFAULT_MODEL, TOOL_PRESETS, DispatchOptions, normalize_model
 
 log = logging.getLogger("devfleet.dispatcher")
 
@@ -31,11 +31,11 @@ def _build_cli_args(mission: dict, opts: DispatchOptions | None = None) -> list[
     ]
 
     # Model: override > mission > default
-    model = "claude-opus-4-6"
+    model = DEFAULT_MODEL
     if opts and opts.model:
-        model = opts.model
+        model = normalize_model(opts.model)
     elif mission.get("model"):
-        model = mission["model"]
+        model = normalize_model(mission["model"])
     args += ["--model", model]
 
     # Max turns
@@ -202,11 +202,11 @@ async def dispatch_mission(session_id: str, mission: dict, last_report: dict | N
         cli_args = _build_cli_args(mission, opts)
         cli_args += ["-p", full_prompt]
 
-        model_used = "claude-opus-4-6"
+        model_used = DEFAULT_MODEL
         if opts and opts.model:
-            model_used = opts.model
+            model_used = normalize_model(opts.model)
         elif mission.get("model"):
-            model_used = mission["model"]
+            model_used = normalize_model(mission["model"])
 
         log.info("Dispatching session %s for mission '%s' in %s (model: %s, worktree: %s)",
                  session_id, mission["title"], work_dir, model_used, worktree_path is not None)

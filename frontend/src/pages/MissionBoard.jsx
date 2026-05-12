@@ -10,7 +10,7 @@ export default function MissionBoard({ navigate }) {
   const [activeTab, setActiveTab] = useState('all');
   const [filterProject, setFilterProject] = useState('');
   const [showModal, setShowModal] = useState(false);
-  const [form, setForm] = useState({ project_id: '', title: '', detailed_prompt: '', acceptance_criteria: '', priority: 0, tags: '', model: 'claude-opus-4-6', mission_type: 'implement', auto_dispatch: false, schedule_cron: '', depends_on: '' });
+  const [form, setForm] = useState({ project_id: '', title: '', detailed_prompt: '', acceptance_criteria: '', priority: 0, tags: '', model: 'glm-5.1', mission_type: 'implement', auto_dispatch: false, schedule_cron: '', depends_on: '' });
   const [error, setError] = useState(null);
 
   const load = async () => {
@@ -52,7 +52,7 @@ export default function MissionBoard({ navigate }) {
       };
       delete payload.depends_on_text;
       await createMission(payload);
-      setForm({ project_id: '', title: '', detailed_prompt: '', acceptance_criteria: '', priority: 0, tags: '', model: 'claude-opus-4-6', mission_type: 'implement', auto_dispatch: false, schedule_cron: '', depends_on: '' });
+      setForm({ project_id: '', title: '', detailed_prompt: '', acceptance_criteria: '', priority: 0, tags: '', model: 'glm-5.1', mission_type: 'implement', auto_dispatch: false, schedule_cron: '', depends_on: '' });
       setShowModal(false);
       load();
     } catch (e) {
@@ -132,9 +132,9 @@ export default function MissionBoard({ navigate }) {
                 <div className="form-group" style={{ flex: 1 }}>
                   <label className="form-label">Model</label>
                   <select className="form-select" value={form.model} onChange={e => setForm({ ...form, model: e.target.value })}>
-                    <option value="claude-opus-4-6">Opus 4.6</option>
-                    <option value="claude-sonnet-4-6">Sonnet 4.6</option>
-                    <option value="claude-haiku-4-5-20251001">Haiku 4.5</option>
+                    <option value="glm-5.1">GLM 5.1</option>
+                    <option value="tencent/hy3-preview">HY3 Preview</option>
+                    <option value="minimax-m2.7">MiniMax M2.7</option>
                   </select>
                 </div>
                 <div className="form-group" style={{ flex: 1 }}>

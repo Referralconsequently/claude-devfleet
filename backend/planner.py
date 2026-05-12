@@ -19,6 +19,7 @@ import uuid
 from datetime import datetime, timezone
 
 from db import get_db
+from models import PLANNER_MODEL
 
 log = logging.getLogger("devfleet.planner")
 
@@ -88,7 +89,7 @@ async def _call_planner(prompt: str, cwd: str) -> str:
         from claude_code_sdk.types import TextBlock
 
         options = ClaudeCodeOptions(
-            model="claude-sonnet-4-6",
+            model=PLANNER_MODEL,
             permission_mode="bypassPermissions",
             max_turns=1,
             cwd=cwd,
@@ -111,7 +112,7 @@ async def _call_planner(prompt: str, cwd: str) -> str:
         import asyncio
         proc = await asyncio.create_subprocess_exec(
             "claude", "-p", prompt, "--output-format", "text",
-            "--model", "claude-sonnet-4-6", "--max-turns", "1",
+            "--model", PLANNER_MODEL, "--max-turns", "1",
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
             cwd=cwd,
@@ -234,11 +235,11 @@ async def plan_project(user_prompt: str, project_path: str) -> dict:
                    (id, project_id, title, detailed_prompt, acceptance_criteria,
                     status, priority, tags, model, mission_type,
                     depends_on, auto_dispatch, mission_number, created_at, updated_at)
-                   VALUES (?, ?, ?, ?, ?, 'draft', ?, ?, 'claude-sonnet-4-6', ?, ?, ?, ?, ?, ?)""",
+                   VALUES (?, ?, ?, ?, ?, 'draft', ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 (
                     mission_id, project_id,
                     m["title"], m["detailed_prompt"], m.get("acceptance_criteria", ""),
-                    m.get("priority", 1), tags,
+                    m.get("priority", 1), tags, PLANNER_MODEL,
                     m.get("mission_type", "implement"),
                     json.dumps(depends_on), auto_dispatch, mission_number,
                     now, now,

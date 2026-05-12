@@ -23,6 +23,7 @@ from mcp.server import Server
 import mcp.types as types
 
 import db
+from models import DEFAULT_MODEL, normalize_model
 
 log = logging.getLogger("devfleet.mcp-external")
 
@@ -101,7 +102,7 @@ TOOLS = [
                 },
                 "auto_dispatch": {"type": "boolean", "description": "Auto-dispatch when dependencies complete"},
                 "priority": {"type": "integer", "description": "Priority (0=normal, 1=high, 2=critical)"},
-                "model": {"type": "string", "description": "Model to use (default: claude-sonnet-4-20250514)"},
+                "model": {"type": "string", "description": f"LiteLLM gateway model alias to use (default: {DEFAULT_MODEL})"},
             },
             "required": ["project_id", "title", "prompt"],
         },
@@ -344,7 +345,7 @@ async def _create_mission(args: dict, conn) -> dict:
             depends_on,
             auto_dispatch,
             args.get("priority", 0),
-            args.get("model", "claude-sonnet-4-20250514"),
+            normalize_model(args.get("model"), DEFAULT_MODEL),
             next_num,
         ),
     )
@@ -397,7 +398,7 @@ async def _dispatch_mission(args: dict, conn) -> dict:
 
     # Create session in DB (matches app.py flow)
     session_id = str(_uuid.uuid4())
-    model_used = args.get("model") or mission.get("model") or "claude-opus-4-6"
+    model_used = normalize_model(args.get("model") or mission.get("model"), DEFAULT_MODEL)
     await conn.execute(
         "INSERT INTO agent_sessions (id, mission_id, model) VALUES (?, ?, ?)",
         (session_id, mid, model_used),
@@ -420,7 +421,7 @@ async def _dispatch_mission(args: dict, conn) -> dict:
 
     opts_kwargs = {}
     if args.get("model"):
-        opts_kwargs["model"] = args["model"]
+        opts_kwargs["model"] = normalize_model(args["model"])
     if args.get("max_turns"):
         opts_kwargs["max_turns"] = args["max_turns"]
     opts = DispatchOptions(**opts_kwargs) if opts_kwargs else None

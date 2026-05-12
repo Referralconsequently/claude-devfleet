@@ -193,7 +193,7 @@ export default function MissionDetail({ id, navigate }) {
             <StatusBadge status={mission.status} />
             <span className="text-sm text-muted">{mission.project_name}</span>
             <span className="text-sm text-muted">{timeAgo(mission.updated_at)}</span>
-            {mission.model && mission.model !== 'claude-opus-4-6' && (
+            {mission.model && mission.model !== 'glm-5.1' && (
               <span className="tag">{mission.model.replace('claude-', '').replace(/-\d+$/, '')}</span>
             )}
             {mission.mission_type && mission.mission_type !== 'implement' && (

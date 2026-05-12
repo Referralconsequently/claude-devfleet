@@ -19,6 +19,7 @@ import uuid
 from datetime import datetime, timezone
 
 import db
+from models import DEFAULT_MODEL, normalize_model
 
 log = logging.getLogger("devfleet.mission_watcher")
 
@@ -96,7 +97,7 @@ async def _dispatch_eligible(mission: dict):
         last_report = dict(rows[0]) if rows else None
 
         # Create session
-        model = mission.get("model") or "claude-opus-4-6"
+        model = normalize_model(mission.get("model"), DEFAULT_MODEL)
         await conn.execute(
             "INSERT INTO agent_sessions (id, mission_id, model) VALUES (?, ?, ?)",
             (session_id, mission_id, model),

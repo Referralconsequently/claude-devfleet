@@ -399,7 +399,7 @@ def main():
     # dispatch
     p_dispatch = sub.add_parser("dispatch", help="Dispatch a mission to an agent")
     p_dispatch.add_argument("mission_id", help="Mission ID")
-    p_dispatch.add_argument("--model", help="Override model (e.g. claude-sonnet-4-6)")
+    p_dispatch.add_argument("--model", help="Override model (e.g. tencent/hy3-preview)")
 
     # status
     p_status = sub.add_parser("status", help="Show mission status")

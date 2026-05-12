@@ -15,6 +15,7 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Optional
 
 from db import get_db
+from models import PLANNER_MODEL
 
 log = logging.getLogger("devfleet.health_metrics")
 
@@ -252,7 +253,7 @@ def _generate_recommendations(
     if session_stats["total_cost_usd"] > 100:
         recommendations.append(
             f"Total spend is ${session_stats['total_cost_usd']:.2f}. "
-            f"Consider using claude-sonnet-4-6 for some mission types to reduce cost."
+            f"Consider using {PLANNER_MODEL} for some mission types to reduce cost."
         )
 
     # Success rate

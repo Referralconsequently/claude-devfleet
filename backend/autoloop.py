@@ -25,6 +25,7 @@ import uuid
 from datetime import datetime, timezone
 
 import db
+from models import PLANNER_MODEL
 from prompt_template import build_prompt
 
 # Use SDK engine if available, fall back to CLI dispatcher
@@ -152,7 +153,7 @@ async def _call_planner(prompt: str, cwd: str) -> str:
         from claude_code_sdk.types import TextBlock
 
         options = ClaudeCodeOptions(
-            model="claude-sonnet-4-6",
+            model=PLANNER_MODEL,
             permission_mode="bypassPermissions",
             max_turns=1,
             cwd=cwd,
@@ -177,7 +178,7 @@ async def _call_planner(prompt: str, cwd: str) -> str:
             "claude",
             "--print",
             "--dangerously-skip-permissions",
-            "--model", "claude-sonnet-4-6",
+            "--model", PLANNER_MODEL,
             "-p", prompt,
             cwd=cwd,
             stdout=asyncio.subprocess.PIPE,

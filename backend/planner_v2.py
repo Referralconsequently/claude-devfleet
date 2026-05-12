@@ -16,6 +16,7 @@ from datetime import datetime, timezone
 from typing import Optional, List
 
 from db import get_db
+from models import DEFAULT_MODEL
 
 log = logging.getLogger("devfleet.planner_v2")
 
@@ -74,7 +75,7 @@ async def _call_intelligent_planner(prompt: str, cwd: str) -> str:
         from claude_code_sdk import query as sdk_query, ClaudeCodeOptions
 
         options = ClaudeCodeOptions(
-            model="claude-opus-4-6",
+            model=DEFAULT_MODEL,
             permission_mode="bypassPermissions",
             max_turns=1,
             cwd=cwd,
@@ -102,7 +103,7 @@ async def _call_intelligent_planner(prompt: str, cwd: str) -> str:
         import asyncio
         proc = await asyncio.create_subprocess_exec(
             "claude", "-p", prompt, "--output-format", "text",
-            "--model", "claude-opus-4-6", "--max-turns", "1",
+            "--model", DEFAULT_MODEL, "--max-turns", "1",
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
             cwd=cwd,
@@ -199,7 +200,7 @@ async def plan_project_intelligent(user_prompt: str, project_path: str) -> dict:
                 mission_data.get("priority", 1),
                 json.dumps(depends_on),
                 1,  # auto_dispatch=true
-                "claude-opus-4-6",
+                DEFAULT_MODEL,
                 i + 1
             ))
 

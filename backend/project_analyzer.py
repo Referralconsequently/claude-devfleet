@@ -17,6 +17,7 @@ from typing import Optional, List
 import uuid
 
 from db import get_db
+from models import DEFAULT_MODEL
 
 log = logging.getLogger("devfleet.project_analyzer")
 
@@ -43,7 +44,7 @@ async def analyze_project_files(
         analysis_prompt = _build_analysis_prompt(project_path, files_to_analyze, custom_prompt)
 
         options = ClaudeCodeOptions(
-            model="claude-opus-4-6",
+            model=DEFAULT_MODEL,
             permission_mode="bypassPermissions",
             max_turns=1,
             cwd=project_path,

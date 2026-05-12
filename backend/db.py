@@ -1,9 +1,11 @@
 import aiosqlite
 import os
 
+from models import DEFAULT_MODEL, LEGACY_MODEL_ALIASES
+
 DB_PATH = os.environ.get("DEVFLEET_DB", os.path.join(os.path.dirname(__file__), "..", "data", "devfleet.db"))
 
-SCHEMA = """
+SCHEMA = f"""
 CREATE TABLE IF NOT EXISTS projects (
     id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
@@ -23,7 +25,7 @@ CREATE TABLE IF NOT EXISTS missions (
     created_at TEXT DEFAULT (datetime('now')),
     updated_at TEXT DEFAULT (datetime('now')),
     tags TEXT DEFAULT '[]',
-    model TEXT DEFAULT 'claude-opus-4-6',
+    model TEXT DEFAULT '{DEFAULT_MODEL}',
     max_turns INTEGER,
     max_budget_usd REAL,
     allowed_tools TEXT DEFAULT '',
@@ -46,8 +48,8 @@ CREATE TABLE IF NOT EXISTS agent_sessions (
     exit_code INTEGER,
     output_log TEXT DEFAULT '',
     error_log TEXT DEFAULT '',
-    model TEXT DEFAULT 'claude-opus-4-6',
-    token_usage TEXT DEFAULT '{}',
+    model TEXT DEFAULT '{DEFAULT_MODEL}',
+    token_usage TEXT DEFAULT '{{}}',
     claude_session_id TEXT DEFAULT '',
     remote_url TEXT DEFAULT '',
     total_cost_usd REAL DEFAULT 0,
@@ -121,7 +123,7 @@ CREATE TABLE IF NOT EXISTS mission_events (
     mission_id TEXT NOT NULL REFERENCES missions(id) ON DELETE CASCADE,
     event_type TEXT NOT NULL,
     source_mission_id TEXT,
-    data TEXT DEFAULT '{}',
+    data TEXT DEFAULT '{{}}',
     created_at TEXT DEFAULT (datetime('now'))
 );
 
@@ -133,7 +135,7 @@ CREATE TABLE IF NOT EXISTS mcp_configs (
     project_id TEXT NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
     server_name TEXT NOT NULL,
     server_type TEXT DEFAULT 'stdio',
-    config_json TEXT NOT NULL DEFAULT '{}',
+    config_json TEXT NOT NULL DEFAULT '{{}}',
     enabled INTEGER DEFAULT 1,
     created_at TEXT DEFAULT (datetime('now'))
 );
@@ -154,7 +156,7 @@ async def init_db():
             "ALTER TABLE agent_sessions ADD COLUMN claude_session_id TEXT DEFAULT ''",
             "ALTER TABLE reports ADD COLUMN preview_url TEXT DEFAULT ''",
             # v2: Claude Code power features
-            "ALTER TABLE missions ADD COLUMN model TEXT DEFAULT 'claude-opus-4-6'",
+            f"ALTER TABLE missions ADD COLUMN model TEXT DEFAULT '{DEFAULT_MODEL}'",
             "ALTER TABLE missions ADD COLUMN max_turns INTEGER",
             "ALTER TABLE missions ADD COLUMN max_budget_usd REAL",
             "ALTER TABLE missions ADD COLUMN allowed_tools TEXT DEFAULT ''",
@@ -187,6 +189,9 @@ async def init_db():
                 ) numbered WHERE numbered.id = missions.id
             ) WHERE mission_number IS NULL
         """)
+        for legacy_model, gateway_model in LEGACY_MODEL_ALIASES.items():
+            await db.execute("UPDATE missions SET model=? WHERE model=?", (gateway_model, legacy_model))
+            await db.execute("UPDATE agent_sessions SET model=? WHERE model=?", (gateway_model, legacy_model))
         await db.commit()
 
 

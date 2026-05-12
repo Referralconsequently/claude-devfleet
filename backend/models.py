@@ -26,12 +26,40 @@ TOOL_PRESETS = {
     "fix": ["Read", "Write", "Edit", "Bash", "Grep", "Glob"],
 }
 
-MODEL_CHOICES = ["claude-opus-4-6", "claude-sonnet-4-6", "claude-haiku-4-5-20251001"]
+GATEWAY_OPUS_MODEL = "glm-5.1"
+GATEWAY_SONNET_MODEL = "tencent/hy3-preview"
+GATEWAY_HAIKU_MODEL = "minimax-m2.7"
+DEFAULT_MODEL = GATEWAY_OPUS_MODEL
+PLANNER_MODEL = GATEWAY_SONNET_MODEL
+
+MODEL_CHOICES = [GATEWAY_OPUS_MODEL, GATEWAY_SONNET_MODEL, GATEWAY_HAIKU_MODEL]
+
+LEGACY_MODEL_ALIASES = {
+    "claude-opus-4-6": GATEWAY_OPUS_MODEL,
+    "claude-sonnet-4-6": GATEWAY_SONNET_MODEL,
+    "claude-haiku-4-5-20251001": GATEWAY_HAIKU_MODEL,
+    "claude-sonnet-4-20250514": GATEWAY_SONNET_MODEL,
+}
+
+
+def normalize_model(model: Optional[str], default: str = DEFAULT_MODEL) -> str:
+    candidate = model or default
+    if candidate.startswith("anthropic/"):
+        candidate = candidate.split("/", 1)[1]
+    if candidate in LEGACY_MODEL_ALIASES:
+        return LEGACY_MODEL_ALIASES[candidate]
+    if candidate.startswith("claude-opus-"):
+        return GATEWAY_OPUS_MODEL
+    if candidate.startswith("claude-sonnet-"):
+        return GATEWAY_SONNET_MODEL
+    if candidate.startswith("claude-haiku-"):
+        return GATEWAY_HAIKU_MODEL
+    return candidate
 
 
 class DispatchOptions(BaseModel):
     """Per-dispatch overrides for Claude CLI invocation."""
-    model: Optional[str] = None              # claude-opus-4-6, claude-sonnet-4-6, claude-haiku-4-5-20251001
+    model: Optional[str] = None              # LiteLLM gateway alias such as glm-5.1 or tencent/hy3-preview
     max_turns: Optional[int] = None          # --max-turns N
     max_budget_usd: Optional[float] = None   # --max-budget-usd N
     allowed_tools: Optional[List[str]] = None # --allowedTools list (or preset name)
@@ -49,7 +77,7 @@ class MissionCreate(BaseModel):
     priority: int = 0
     tags: List[str] = []
     # Default dispatch config stored on mission
-    model: str = "claude-opus-4-6"
+    model: str = DEFAULT_MODEL
     max_turns: Optional[int] = None
     max_budget_usd: Optional[float] = None
     allowed_tools: Optional[str] = None      # JSON string or preset name

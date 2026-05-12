@@ -13,6 +13,7 @@ import logging
 from typing import Dict, List
 
 from db import get_db
+from models import DEFAULT_MODEL, PLANNER_MODEL
 
 log = logging.getLogger("devfleet.cost_optimizer")
 
@@ -164,8 +165,8 @@ def _identify_optimizations(
                 "type": "mission_model_downgrade",
                 "mission_type": mtype,
                 "current_avg_cost": avg_cost,
-                "current_model": "likely claude-opus-4-6",
-                "suggested_model": "claude-sonnet-4-6",
+                "current_model": f"likely {DEFAULT_MODEL}",
+                "suggested_model": PLANNER_MODEL,
                 "potential_savings": round(potential_savings, 2),
                 "rationale": f"{mtype} missions average ${avg_cost:.2f}. These could use Sonnet.",
                 "risk_level": "low"

@@ -15,7 +15,7 @@ import db
 from models import (ProjectCreate, ProjectUpdate, MissionCreate, MissionUpdate,
                     DispatchOptions, TOOL_PRESETS, MODEL_CHOICES,
                     ServiceCreate, ServiceUpdate, IncidentCreate, IncidentUpdate,
-                    McpServerCreate)
+                    McpServerCreate, DEFAULT_MODEL, normalize_model)
 import health_checker
 import mission_watcher
 import scheduler
@@ -376,7 +376,7 @@ async def create_mission(body: MissionCreate):
                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             (mid, body.project_id, body.title, body.detailed_prompt,
              body.acceptance_criteria, body.priority, json.dumps(body.tags),
-             body.model, body.max_turns, body.max_budget_usd,
+             normalize_model(body.model), body.max_turns, body.max_budget_usd,
              body.allowed_tools or "", body.mission_type,
              body.parent_mission_id, json.dumps(body.depends_on),
              1 if body.auto_dispatch else 0, body.schedule_cron, schedule_enabled, next_num),
@@ -617,7 +617,7 @@ async def dispatch(mid: str, body: DispatchOptions | None = None):
         last_report = dict(reports[0]) if reports else None
 
         session_id = str(uuid.uuid4())
-        model_used = (body and body.model) or mission.get("model") or "claude-opus-4-6"
+        model_used = normalize_model((body and body.model) or mission.get("model"), DEFAULT_MODEL)
         await conn.execute(
             "INSERT INTO agent_sessions (id, mission_id, model) VALUES (?, ?, ?)",
             (session_id, mid, model_used),
