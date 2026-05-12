@@ -286,7 +286,7 @@ export default function Dashboard({ navigate }) {
           Plan a Project
         </div>
         <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 14, lineHeight: 1.5 }}>
-          Describe what you want to build. AI will create the project and break it into dependent missions automatically.
+          Describe what you want to build. AI will create the project and break it into parallel-ready missions with dependencies.
         </p>
         <form onSubmit={async (e) => {
           e.preventDefault();
@@ -408,7 +408,7 @@ export default function Dashboard({ navigate }) {
               ))}
             </div>
             <p style={{ fontSize: 11, color: 'var(--text-dim)', marginTop: 10 }}>
-              Dispatch Mission #1 to start the chain. The rest will auto-dispatch as dependencies complete.
+              Dispatch Mission #1 to start the fleet. Independent and dependency-ready missions auto-dispatch until slots are full.
             </p>
           </div>
         )}

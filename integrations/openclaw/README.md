@@ -140,7 +140,7 @@ Claude calls `mcp__devfleet__cancel_mission(mission_id="...")` → stops the age
 
 | Tool | Description |
 |------|-------------|
-| `plan_project(prompt)` | AI breaks description into chained missions with dependencies |
+| `plan_project(prompt)` | AI breaks description into parallel-ready missions with dependencies |
 | `create_project(name, path?, description?)` | Create a project manually |
 | `create_mission(project_id, title, prompt, ...)` | Add a mission with `depends_on`, `auto_dispatch`, `priority` |
 | `dispatch_mission(mission_id, model?, max_turns?)` | Start an agent on a mission |

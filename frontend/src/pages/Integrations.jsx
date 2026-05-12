@@ -34,7 +34,7 @@ const INTEGRATIONS = [
       usage: '/devfleet Build a REST API with auth and tests',
     },
     docsUrl: 'https://github.com/LEC-AI/claude-devfleet/tree/main/integrations/ecc',
-    features: ['Slash command support', 'Skill system integration', 'Full MCP tool access', 'Auto-dispatch chains'],
+    features: ['Slash command support', 'Skill system integration', 'Full MCP tool access', 'Auto-dispatch DAGs'],
   },
   {
     id: 'openclaw',
@@ -62,7 +62,7 @@ const INTEGRATIONS = [
       usage: 'Use DevFleet to build a Python CLI tool that converts CSV to JSON.',
     },
     docsUrl: 'https://github.com/LEC-AI/claude-devfleet/tree/main/integrations/openclaw',
-    features: ['REPL-driven workflow', 'Skill auto-loading', 'Plan approval loop', 'Auto-dispatch chains'],
+    features: ['REPL-driven workflow', 'Skill auto-loading', 'Plan approval loop', 'Auto-dispatch DAGs'],
   },
   {
     id: 'cursor',
@@ -148,7 +148,7 @@ POST messages: http://localhost:18801/mcp/messages/`,
 ];
 
 const MCP_TOOLS = [
-  { name: 'plan_project', args: 'prompt', desc: 'AI breaks description into chained missions with dependency DAG' },
+  { name: 'plan_project', args: 'prompt', desc: 'AI breaks description into parallel-ready missions with dependency DAG' },
   { name: 'create_project', args: 'name, path?, description?', desc: 'Create a project manually' },
   { name: 'create_mission', args: 'project_id, title, prompt, depends_on?, auto_dispatch?', desc: 'Add a mission with dependencies' },
   { name: 'dispatch_mission', args: 'mission_id, model?, max_turns?', desc: 'Start an agent on a mission' },

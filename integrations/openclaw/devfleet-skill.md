@@ -8,7 +8,7 @@ Use the `mcp__devfleet__*` tools to plan projects, dispatch agents, and monitor 
 
 | Tool | Usage |
 |------|-------|
-| `plan_project(prompt)` | AI breaks a description into a project with chained missions |
+| `plan_project(prompt)` | AI breaks a description into a project with parallel-ready missions |
 | `create_project(name, path?, description?)` | Create a project manually |
 | `create_mission(project_id, title, prompt, depends_on?, auto_dispatch?)` | Add a mission |
 | `dispatch_mission(mission_id, model?, max_turns?)` | Start an agent on a mission |

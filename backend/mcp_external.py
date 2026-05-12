@@ -51,7 +51,7 @@ TOOLS = [
         name="plan_project",
         description=(
             "Plan a project from a natural language description. "
-            "AI breaks the prompt into a project with chained missions, "
+            "AI breaks the prompt into a project with parallel-ready missions, "
             "dependencies, and auto-dispatch. Returns project ID and mission list."
         ),
         inputSchema={
@@ -292,7 +292,7 @@ async def _plan_project(args: dict, conn) -> dict:
             }
             for m in result["missions"]
         ],
-        "hint": "Dispatch the first mission to start the chain. The rest auto-dispatch as dependencies complete.",
+        "hint": "Dispatch the first mission to start the fleet. Independent and dependency-ready missions auto-dispatch until slots are full.",
     }
 
 

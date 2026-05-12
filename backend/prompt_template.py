@@ -4,6 +4,29 @@ def build_prompt(mission: dict, last_report: dict | None = None) -> str:
         "Work through the task step by step. Write clean, production-quality code.",
         "You are part of a multi-agent fleet — your report feeds into the next agent's context, so be precise.",
         "",
+        "## Parallelization Gate",
+        (
+            "Before implementation, decide whether this mission contains independent "
+            "sidecar work that another agent can own without blocking your next local step."
+        ),
+        (
+            "If it does, create one or two focused sub-missions with the "
+            "`create_sub_mission` tool before doing the local work."
+        ),
+        (
+            "Use `wait_for_me=false` for independent work that can start immediately; "
+            "use `wait_for_me=true` only when the sub-mission must wait for your output."
+        ),
+        (
+            "Keep the critical path and tightly coupled work local. Give each sub-mission "
+            "a clear scope, owned files or responsibility, acceptance criteria, and a "
+            "warning not to revert other agents' edits."
+        ),
+        (
+            "Do not create sub-missions just to add activity; only delegate work that is "
+            "separable and materially advances the mission."
+        ),
+        "",
         f"## Mission: {mission['title']}",
     ]
 

@@ -116,7 +116,7 @@ Use devfleet to plan a project: "REST API with user auth and rate limiting"
 Claude will:
 1. Call plan_project to break it into missions
 2. Show you the plan (missions, dependencies)
-3. Dispatch the first mission to start the chain
+3. Dispatch the first mission to start the fleet
 4. Report back with project ID and status
 ```
 

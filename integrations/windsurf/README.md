@@ -57,7 +57,7 @@ List the available DevFleet tools
 
 | Tool | Description |
 |------|-------------|
-| `plan_project` | Break a natural language prompt into a project with chained missions |
+| `plan_project` | Break a natural language prompt into a project with parallel-ready missions |
 | `create_project` | Create a project manually |
 | `create_mission` | Create a mission with dependencies and auto-dispatch |
 | `dispatch_mission` | Start an agent on a mission |

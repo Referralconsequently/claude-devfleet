@@ -98,7 +98,7 @@ graph TD
     end
 
     subgraph Coordinator["Mission Coordinator"]
-        Planner["Planner\nnatural language to chained missions"]
+        Planner["Planner\nnatural language to parallel-ready missions"]
         Watcher["Mission Watcher\npolls every 5s, checks depends_on"]
         AutoLoop["Auto-Loop\nparallel-aware plan then dispatch"]
     end

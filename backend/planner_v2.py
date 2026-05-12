@@ -3,7 +3,7 @@ Enhanced Project Planner — Uses extended thinking + structured outputs
 
 Improvements over planner.py:
 - Extended thinking (reasoning tokens) for better mission planning
-- Structured JSON outputs for mission chains
+- Structured JSON outputs for mission dependency graphs
 - Suggests optimal parallelization and critical path
 - Estimates complexity/time per mission
 """
@@ -61,8 +61,9 @@ Break down this project into 2-5 well-scoped, parallelizable missions. Think dee
 }}
 
 ## Rules
-- First mission must have depends_on_index: null
-- Use depends_on_index sparingly (enable parallelization where possible)
+- Mission #1 must have depends_on_index: null
+- Additional independent root missions should also use depends_on_index: null
+- Use depends_on_index only for true blockers; avoid a serial chain when agents can work in parallel
 - Estimate hours realistically (agents are smart but not magic)
 - Each prompt must be self-contained
 - Include edge cases and error handling in criteria

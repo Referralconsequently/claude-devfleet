@@ -139,7 +139,7 @@ docker compose up -d
 - **Session Resume** — Resume failed sessions with full conversation context preserved
 - **Structured Reports** — Agents submit structured reports via MCP tool (files changed, what's done/open, next steps)
 - **Generate Next Mission** — One-click follow-up mission from the last report's next steps
-- **AI Project Planner** — Describe what you want to build in natural language; Claude breaks it into a project with chained missions, dependencies, and auto-dispatch
+- **AI Project Planner** — Describe what you want to build in natural language; Claude breaks it into a project with parallel-ready missions, dependencies, and auto-dispatch
 
 ### Multi-Agent Orchestration
 
@@ -216,7 +216,7 @@ sequenceDiagram
 
 | Tool | Description |
 |------|-------------|
-| `plan_project` | One-prompt project creation — AI breaks your description into chained missions |
+| `plan_project` | One-prompt project creation — AI breaks your description into parallel-ready missions |
 | `create_project` | Create a project manually |
 | `create_mission` | Add a mission with dependencies, auto-dispatch, priority |
 | `dispatch_mission` | Send an agent to work on a mission |
@@ -350,7 +350,7 @@ Take over any agent session from your phone or browser:
 | `backend/mcp_context.py` | Stdio MCP server: contextual intelligence (mission, project, session, team context) |
 | `backend/mcp_devfleet.py` | Stdio MCP server: agent self-service (submit report, create sub-missions, request review, check sub-mission status) |
 | `backend/mcp_external.py` | MCP server: external integration (plan, dispatch, cancel, wait, dashboard — Streamable HTTP at `/mcp`, SSE legacy at `/mcp/sse`) |
-| `backend/planner.py` | AI project planner: natural language → project + chained missions via Claude |
+| `backend/planner.py` | AI project planner: natural language → project + parallel-ready dependency graph via Claude |
 | `backend/autoloop.py` | Auto-loop: parallel-aware plan-dispatch cycle (single or multi-task per iteration) |
 | `backend/dispatcher.py` | CLI engine (fallback): spawns `claude` CLI, parses stream-json, broadcasts SSE |
 | `backend/remote_control.py` | Remote control manager: spawns `claude remote-control`, parses URL, monitors sessions |
@@ -397,7 +397,7 @@ Works with: Claude Code, Cursor, Windsurf, Cline, and any MCP-compatible agent.
 - `POST /mcp/messages/` — JSON-RPC message handler
 
 ### Planner
-- `POST /api/plan` — AI project planner: takes a natural language prompt, returns a project with chained missions
+- `POST /api/plan` — AI project planner: takes a natural language prompt, returns a project with parallel-ready missions
 
 ### Projects
 - `GET /api/projects` — List projects

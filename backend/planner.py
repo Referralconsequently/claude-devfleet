@@ -3,13 +3,13 @@ Project Planner — One-prompt project planning
 
 Takes a natural language description of what to build and uses Claude to:
 1. Generate a project name and description
-2. Break down the work into sequential/parallel missions with dependencies
+2. Break down the work into parallel-ready missions with dependencies
 3. Create everything in the database, ready to dispatch
 
 Example input: "Build a task management REST API with Node.js, Express,
                in-memory storage, full CRUD, and automated tests"
 
-Output: Project + 3-4 chained missions with depends_on and auto_dispatch set.
+Output: Project + 3-4 missions with depends_on and auto_dispatch set.
 """
 
 import json
@@ -23,7 +23,7 @@ from models import PLANNER_MODEL
 
 log = logging.getLogger("devfleet.planner")
 
-PLANNER_PROMPT = """You are a DevFleet project planner. Given a high-level project description, break it down into a project and a sequence of well-scoped coding missions.
+PLANNER_PROMPT = """You are a DevFleet project planner. Given a high-level project description, break it down into a project and a dependency graph of well-scoped coding missions.
 
 ## User's Request
 {user_prompt}
@@ -35,8 +35,9 @@ PLANNER_PROMPT = """You are a DevFleet project planner. Given a high-level proje
 
 Create a project plan with 2-5 missions. Each mission should be:
 - Completable by a single AI coding agent in one session (30-60 min of work)
-- Specific enough that an agent can work independently
-- Properly sequenced — later missions build on earlier ones
+- Specific enough that an agent can work independently when it has no dependencies
+- Parallel-ready — use independent root missions for work that can safely happen at the same time
+- Properly sequenced only where needed — later missions depend on earlier ones only for true blockers
 
 Respond in this EXACT JSON format (no markdown, no code fences, just raw JSON):
 
@@ -71,15 +72,22 @@ CRITICAL — keep it concise:
 - Total JSON response must be under 2000 characters.
 
 Rules:
-- `depends_on_index` is the 0-based index of the mission this depends on, or null for the first mission
+- `depends_on_index` is the 0-based index of the mission this depends on, or null when there is no true blocker
 - A mission can only depend on ONE earlier mission (use the index, not the title)
-- The first mission should ALWAYS have `depends_on_index: null`
+- Mission #1 should ALWAYS have `depends_on_index: null`
+- Additional independent root missions SHOULD also use `depends_on_index: null` so DevFleet can run up to 3 agents in parallel
+- Avoid a serial chain unless each mission truly needs the prior mission's output
 - Mission types: scaffold (project setup), implement (build features), feature (add a feature), test (write tests), fix (bug fix), review (code review)
 - Each detailed_prompt must be self-contained — assume the agent only sees that prompt plus the previous mission's report
 - Be specific about technology choices, file paths, port numbers, data structures
 - Include validation, error handling, and edge cases in acceptance criteria
 - The last mission should ideally be tests or integration verification
 """
+
+
+def _should_auto_dispatch_planned_mission(index: int) -> int:
+    """Mission #1 is the manual kickoff; every later ready mission can fill slots."""
+    return 1 if index > 0 else 0
 
 
 async def _call_planner(prompt: str, cwd: str) -> str:
@@ -204,7 +212,9 @@ async def plan_project(user_prompt: str, project_path: str) -> dict:
             (project_id, plan["project_name"], project_path, plan.get("project_description", ""), now),
         )
 
-        # Create missions with proper dependency chain
+        # Create missions with dependency metadata. The watcher enforces both
+        # dependencies and global concurrency, so later independent roots can
+        # safely auto-dispatch once the fleet is started.
         created_missions = []
         mission_ids = []  # index -> mission_id mapping
 
@@ -218,8 +228,7 @@ async def plan_project(user_prompt: str, project_path: str) -> dict:
             if depends_on_idx is not None and 0 <= depends_on_idx < len(mission_ids) - 1:
                 depends_on = [mission_ids[depends_on_idx]]
 
-            # Auto-dispatch all except the first mission
-            auto_dispatch = 1 if depends_on else 0
+            auto_dispatch = _should_auto_dispatch_planned_mission(i)
 
             # Get mission number
             row = await conn.execute(

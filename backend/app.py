@@ -920,7 +920,7 @@ class PlanRequest(BaseModel):
 
 @app.post("/api/plan", status_code=201)
 async def api_plan_project(body: PlanRequest):
-    """Take a natural language prompt, plan a project with chained missions."""
+    """Take a natural language prompt, plan a project with a mission dependency graph."""
     # Auto-generate project path if not provided
     project_path = body.project_path
     if not project_path:

@@ -94,6 +94,7 @@ Rules:
 - If the last session had errors, the next task should fix those first
 - If tests are missing, prioritize adding them before new features
 - Only use parallel tasks when they are truly independent (different files/features)
+- When more than one slot is available and independent work exists, return multiple tasks instead of a serial chain
 - Max {max_parallel} parallel tasks based on available agent slots
 """
 
@@ -271,7 +272,16 @@ async def auto_loop(project_id: str, goal: str):
 
         # Calculate available slots
         running = sum(1 for t in running_tasks.values() if not t.done())
-        available_slots = max(1, MAX_CONCURRENT_AGENTS - running)
+        available_slots = MAX_CONCURRENT_AGENTS - running
+        if available_slots <= 0:
+            log.info(
+                "Auto-loop capacity full for project %s: %d/%d agents running",
+                project["name"],
+                running,
+                MAX_CONCURRENT_AGENTS,
+            )
+            await asyncio.sleep(5)
+            continue
 
         # Get running agent info for the planner
         running_info = ""
