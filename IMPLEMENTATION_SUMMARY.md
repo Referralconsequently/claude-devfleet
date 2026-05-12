@@ -246,8 +246,8 @@ Response:
 ### Claude Models Used
 | Feature | Model | Capabilities |
 |---------|-------|---|
-| Intelligent Planner | claude-opus-4-6 | Extended thinking, structured outputs |
-| Project Analyzer | claude-opus-4-6 | Vision, reasoning |
+| Intelligent Planner | glm-5.1 | Extended thinking, structured outputs |
+| Project Analyzer | glm-5.1 | Vision, reasoning |
 | Others | N/A | Local analysis only |
 
 ### Dependencies (Already in requirements.txt)

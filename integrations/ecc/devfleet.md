@@ -29,7 +29,7 @@ After planning, dispatch the first mission (the one with no `depends_on`) to kic
 mcp__devfleet__dispatch_mission(mission_id="<id>")
 ```
 
-Optional overrides: `model` (e.g., "claude-sonnet-4-20250514"), `max_turns` (integer).
+Optional overrides: `model` (e.g., "tencent/hy3-preview"), `max_turns` (integer).
 
 The agent runs asynchronously. You do not need to wait for it.
 

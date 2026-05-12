@@ -182,8 +182,8 @@ Intelligence Module
 
 | Feature | Model | Why |
 |---------|-------|-----|
-| Intelligent Planner | claude-opus-4-6 | Needs deep reasoning for mission breaking |
-| Project Analyzer | claude-opus-4-6 | Vision + understanding requires best model |
+| Intelligent Planner | glm-5.1 | Needs deep reasoning for mission breaking |
+| Project Analyzer | glm-5.1 | Vision + understanding requires best model |
 | Health/Cost/Viz | N/A (local analysis) | Purely algorithmic, no LLM calls |
 
 ### Thinking Tokens
@@ -328,7 +328,7 @@ POST /api/plan-intelligent
     "avg_cost_per_session": 6.12,
     "success_rate_percent": 75.0,
     "by_model": {
-      "claude-opus-4-6": {
+      "glm-5.1": {
         "count": 3,
         "total_cost": 18.00,
         "avg_cost": 6.00
@@ -364,7 +364,7 @@ POST /api/plan-intelligent
     {
       "type": "mission_model_downgrade",
       "mission_type": "test",
-      "suggested_model": "claude-sonnet-4-6",
+      "suggested_model": "tencent/hy3-preview",
       "potential_savings": 3.40,
       "rationale": "test missions average $2.80. These could use Sonnet."
     },
@@ -456,4 +456,3 @@ Project Analyzer requires file access. Ensure the project path is readable and c
 - **planner.py** — Basic project planner
 - **mission_watcher.py** — Auto-dispatch engine
 - **sdk_engine.py** — Mission execution
-

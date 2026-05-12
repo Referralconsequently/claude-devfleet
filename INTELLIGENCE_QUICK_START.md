@@ -96,8 +96,8 @@ Visit the endpoints above with your project IDs.
 
 ## Models Used
 
-- **Intelligent Planner**: claude-opus-4-6 + extended thinking (8000 token budget)
-- **Project Analyzer**: claude-opus-4-6 + vision
+- **Intelligent Planner**: glm-5.1 via LiteLLM gateway + extended thinking (8000 token budget)
+- **Project Analyzer**: glm-5.1 via LiteLLM gateway + vision
 - **Others**: Local analysis (no LLM calls)
 
 ## Example Workflow
