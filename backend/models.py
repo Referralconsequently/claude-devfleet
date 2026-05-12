@@ -33,6 +33,7 @@ DEFAULT_MODEL = GATEWAY_OPUS_MODEL
 PLANNER_MODEL = GATEWAY_SONNET_MODEL
 
 MODEL_CHOICES = [GATEWAY_OPUS_MODEL, GATEWAY_SONNET_MODEL, GATEWAY_HAIKU_MODEL]
+SUPPORTED_CAPABILITIES = "effort,thinking,adaptive_thinking,interleaved_thinking"
 
 MODEL_OPTIONS = [
     {
@@ -82,6 +83,25 @@ def normalize_model(model: Optional[str], default: str = DEFAULT_MODEL) -> str:
     if candidate.startswith("claude-haiku-"):
         return GATEWAY_HAIKU_MODEL
     return candidate
+
+
+def claude_code_gateway_env(model: Optional[str] = None) -> dict[str, str]:
+    """Force Claude Code's internal model defaults onto LiteLLM gateway aliases."""
+    selected_model = normalize_model(model, DEFAULT_MODEL)
+    return {
+        "ANTHROPIC_MODEL": selected_model,
+        "ANTHROPIC_DEFAULT_OPUS_MODEL": GATEWAY_OPUS_MODEL,
+        "ANTHROPIC_DEFAULT_SONNET_MODEL": GATEWAY_SONNET_MODEL,
+        "ANTHROPIC_DEFAULT_HAIKU_MODEL": GATEWAY_HAIKU_MODEL,
+        "ANTHROPIC_SMALL_FAST_MODEL": GATEWAY_HAIKU_MODEL,
+        "ANTHROPIC_CUSTOM_MODEL_OPTION": GATEWAY_OPUS_MODEL,
+        "CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY": "1",
+        "CLAUDE_CODE_SUBAGENT_MODEL": GATEWAY_SONNET_MODEL,
+        "ANTHROPIC_DEFAULT_OPUS_MODEL_SUPPORTED_CAPABILITIES": SUPPORTED_CAPABILITIES,
+        "ANTHROPIC_DEFAULT_SONNET_MODEL_SUPPORTED_CAPABILITIES": SUPPORTED_CAPABILITIES,
+        "ANTHROPIC_DEFAULT_HAIKU_MODEL_SUPPORTED_CAPABILITIES": SUPPORTED_CAPABILITIES,
+        "ANTHROPIC_CUSTOM_MODEL_OPTION_SUPPORTED_CAPABILITIES": SUPPORTED_CAPABILITIES,
+    }
 
 
 class DispatchOptions(BaseModel):

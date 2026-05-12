@@ -9,9 +9,30 @@ from datetime import datetime, timezone
 import db
 from prompt_template import build_prompt
 from worktree import create_worktree, cleanup_worktree, is_git_repo
-from models import DEFAULT_MODEL, TOOL_PRESETS, DispatchOptions, normalize_model
+from models import (
+    DEFAULT_MODEL,
+    TOOL_PRESETS,
+    DispatchOptions,
+    claude_code_gateway_env,
+    normalize_model,
+)
 
 log = logging.getLogger("devfleet.dispatcher")
+AUTH_FAILURE_MARKERS = (
+    "Failed to authenticate. API Error: 401",
+    "key not allowed to access model",
+)
+
+
+def _auth_failure_message(output: str) -> str | None:
+    if not output:
+        return None
+    if any(marker in output for marker in AUTH_FAILURE_MARKERS):
+        return (
+            "Claude Code authentication failed before the agent could run; "
+            "see output_log for provider details."
+        )
+    return None
 
 # Track running agent tasks and processes
 running_tasks: dict[str, asyncio.Task] = {}
@@ -226,7 +247,7 @@ async def dispatch_mission(session_id: str, mission: dict, last_report: dict | N
             cwd=work_dir,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
-            env={**os.environ},
+            env={**os.environ, **claude_code_gateway_env(model_used)},
         )
         _processes[session_id] = process
 
@@ -326,6 +347,11 @@ async def dispatch_mission(session_id: str, mission: dict, last_report: dict | N
         ended_at = datetime.now(timezone.utc).isoformat()
         status = "completed" if exit_code == 0 else "failed"
         mission_status = "completed" if exit_code == 0 else "failed"
+        auth_failure = _auth_failure_message(full_output)
+        if auth_failure:
+            status = "failed"
+            mission_status = "failed"
+            error_log = auth_failure if not error_log else f"{error_log}\n{auth_failure}"
 
         # Parse report from output
         report_data = parse_report(full_output)
@@ -462,6 +488,11 @@ async def resume_mission(session_id: str, mission: dict, claude_session_id: str,
         # Build CLI args with resume flag
         cli_args = _build_cli_args(mission, opts)
         cli_args += ["--resume", claude_session_id]
+        model_used = DEFAULT_MODEL
+        if opts and opts.model:
+            model_used = normalize_model(opts.model)
+        elif mission.get("model"):
+            model_used = normalize_model(mission["model"])
 
         log.info("Resuming session %s for mission '%s' (claude session: %s)",
                  session_id, mission["title"], claude_session_id)
@@ -471,7 +502,7 @@ async def resume_mission(session_id: str, mission: dict, claude_session_id: str,
             cwd=work_dir,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
-            env={**os.environ},
+            env={**os.environ, **claude_code_gateway_env(model_used)},
         )
         _processes[session_id] = process
 
@@ -556,6 +587,11 @@ async def resume_mission(session_id: str, mission: dict, claude_session_id: str,
         ended_at = datetime.now(timezone.utc).isoformat()
         status = "completed" if exit_code == 0 else "failed"
         mission_status = "completed" if exit_code == 0 else "failed"
+        auth_failure = _auth_failure_message(full_output)
+        if auth_failure:
+            status = "failed"
+            mission_status = "failed"
+            error_log = auth_failure if not error_log else f"{error_log}\n{auth_failure}"
 
         report_data = parse_report(full_output)
 

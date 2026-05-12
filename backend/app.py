@@ -75,6 +75,13 @@ def reverse_path(path: str) -> str:
 @asynccontextmanager
 async def lifespan(app):
     await db.init_db()
+    orphaned_reason = (
+        "Backend restarted before this agent completed; "
+        "marked failed so the mission can be dispatched again."
+    )
+    orphaned_count = await db.fail_orphaned_running_sessions(orphaned_reason)
+    if orphaned_count:
+        log.warning("Marked %d orphaned running DevFleet session(s) as failed", orphaned_count)
     await health_checker.start_checker()
     await mission_watcher.start_watcher()
     await scheduler.start_scheduler()

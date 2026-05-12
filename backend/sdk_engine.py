@@ -38,6 +38,11 @@ import claude_code_sdk._internal.client as _cl
 _original_parse = _mp.parse_message
 
 _SKIP_EVENT_TYPES = {"rate_limit_event", "tool_use_summary"}
+AUTH_FAILURE_MARKERS = (
+    "Failed to authenticate. API Error: 401",
+    "key not allowed to access model",
+)
+
 
 def _patched_parse(data):
     if isinstance(data, dict) and data.get("type") in _SKIP_EVENT_TYPES:
@@ -52,10 +57,28 @@ _mp.parse_message = _patched_parse
 # Also patch in the client module where it's imported directly
 _cl.parse_message = _patched_parse
 
+
+def _auth_failure_message(output: str) -> str | None:
+    if not output:
+        return None
+    if any(marker in output for marker in AUTH_FAILURE_MARKERS):
+        return (
+            "Claude Code authentication failed before the agent could run; "
+            "see output_log for provider details."
+        )
+    return None
+
+
 import db
 from prompt_template import build_prompt
 from worktree import create_worktree, cleanup_worktree
-from models import DEFAULT_MODEL, TOOL_PRESETS, DispatchOptions, normalize_model
+from models import (
+    DEFAULT_MODEL,
+    TOOL_PRESETS,
+    DispatchOptions,
+    claude_code_gateway_env,
+    normalize_model,
+)
 
 log = logging.getLogger("devfleet.sdk_engine")
 
@@ -232,6 +255,7 @@ def _build_sdk_options(
         permission_mode="bypassPermissions",
         cwd=work_dir,
         resume=resume_session_id,
+        env=claude_code_gateway_env(model),
         include_partial_messages=False,
     )
     if mcp_servers:
@@ -445,7 +469,12 @@ async def _run_agent(
                     })
 
         # Agent finished successfully
-        full_output = "".join(output_chunks)
+        current_output = "".join(output_chunks)
+        auth_failure = _auth_failure_message(current_output)
+        if auth_failure:
+            raise RuntimeError(auth_failure)
+
+        full_output = current_output
         if existing_output:
             full_output = existing_output + "\n--- RESUMED ---\n" + full_output
         ended_at = datetime.now(timezone.utc).isoformat()

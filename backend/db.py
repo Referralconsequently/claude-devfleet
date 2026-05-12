@@ -195,6 +195,33 @@ async def init_db():
         await db.commit()
 
 
+async def fail_orphaned_running_sessions(reason: str) -> int:
+    """Mark DB sessions left running after an API restart as failed."""
+    async with aiosqlite.connect(DB_PATH) as db:
+        rows = await db.execute_fetchall(
+            "SELECT id, mission_id, COALESCE(error_log, '') FROM agent_sessions WHERE status='running'"
+        )
+        if not rows:
+            return 0
+
+        for session_id, mission_id, error_log in rows:
+            new_error = reason if not error_log else f"{error_log}\n{reason}"
+            await db.execute(
+                """UPDATE agent_sessions
+                   SET status='failed', ended_at=datetime('now'), error_log=?
+                   WHERE id=?""",
+                (new_error, session_id),
+            )
+            await db.execute(
+                """UPDATE missions
+                   SET status='failed', updated_at=datetime('now')
+                   WHERE id=? AND status='running'""",
+                (mission_id,),
+            )
+        await db.commit()
+        return len(rows)
+
+
 async def get_db():
     db = await aiosqlite.connect(DB_PATH)
     db.row_factory = aiosqlite.Row
