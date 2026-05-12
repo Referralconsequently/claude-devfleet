@@ -1,10 +1,38 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { getModelOptions } from '../api/client';
 
-const MODELS = [
-  { value: 'glm-5.1', label: 'GLM 5.1 (Most capable)', tier: 'high', icon: '\u{1F9E0}', cost: '~$5\u201315/mission', tagline: 'Maximum intelligence' },
-  { value: 'tencent/hy3-preview', label: 'HY3 Preview (Fast + capable)', tier: 'mid', icon: '\u26A1', cost: '~$1\u20135/mission', tagline: 'Speed meets smarts' },
-  { value: 'minimax-m2.7', label: 'MiniMax M2.7 (Fastest, cheapest)', tier: 'low', icon: '\u{1F680}', cost: '~$0.1\u20131/mission', tagline: 'Blazing fast' },
+const FALLBACK_MODELS = [
+  { value: 'glm-5.1', label: 'GLM 5.1', tier: 'high', icon: '\u{1F9E0}', cost: 'LiteLLM metered', tagline: 'Maximum intelligence' },
+  { value: 'tencent/hy3-preview', label: 'HY3 Preview', tier: 'mid', icon: '\u26A1', cost: 'LiteLLM metered', tagline: 'Speed meets smarts' },
+  { value: 'minimax-m2.7', label: 'MiniMax M2.7', tier: 'low', icon: '\u{1F680}', cost: 'LiteLLM metered', tagline: 'Fast execution' },
 ];
+
+const FALLBACK_BY_VALUE = Object.fromEntries(FALLBACK_MODELS.map(m => [m.value, m]));
+
+function normalizeModelOption(entry) {
+  if (typeof entry === 'string') {
+    return FALLBACK_BY_VALUE[entry] || {
+      value: entry,
+      label: entry,
+      tier: 'mid',
+      icon: '\u26A1',
+      cost: 'LiteLLM metered',
+      tagline: 'Gateway model',
+    };
+  }
+
+  if (!entry || typeof entry !== 'object' || !entry.value) return null;
+
+  const fallback = FALLBACK_BY_VALUE[entry.value] || {};
+  return {
+    value: entry.value,
+    label: entry.label || fallback.label || entry.value,
+    tier: entry.tier || fallback.tier || 'mid',
+    icon: entry.icon || fallback.icon || '\u26A1',
+    cost: entry.cost || fallback.cost || 'LiteLLM metered',
+    tagline: entry.tagline || fallback.tagline || 'Gateway model',
+  };
+}
 
 const PRESET_CATEGORIES = {
   full: { color: '#ef4444', icon: '\u{1F30D}', category: 'all' },
@@ -305,12 +333,33 @@ const styleTag = typeof document !== 'undefined' && (() => {
 
 export default function DispatchPanel({ mission, onDispatch, onCancel }) {
   const [model, setModel] = useState(mission.model || 'glm-5.1');
+  const [modelOptions, setModelOptions] = useState(FALLBACK_MODELS);
   const [maxTurns, setMaxTurns] = useState(mission.max_turns || '');
   const [maxBudget, setMaxBudget] = useState(mission.max_budget_usd || '');
   const [toolPreset, setToolPreset] = useState(mission.mission_type || 'implement');
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [appendPrompt, setAppendPrompt] = useState('');
   const [contextMode, setContextMode] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+
+    getModelOptions()
+      .then(data => {
+        if (!active || !Array.isArray(data)) return;
+        const options = data.map(normalizeModelOption).filter(Boolean);
+        if (!options.length) return;
+        setModelOptions(options);
+        setModel(current => (options.some(option => option.value === current) ? current : options[0].value));
+      })
+      .catch(() => {
+        if (active) setModelOptions(FALLBACK_MODELS);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const handleDispatch = () => {
     const opts = {};
@@ -323,7 +372,7 @@ export default function DispatchPanel({ mission, onDispatch, onCancel }) {
     onDispatch(Object.keys(opts).length > 0 ? opts : null);
   };
 
-  const selectedModel = MODELS.find(m => m.value === model);
+  const selectedModel = modelOptions.find(m => m.value === model);
   const selectedPreset = MISSION_TYPES.find(t => t.value === toolPreset);
 
   const summaryParts = [];
@@ -349,7 +398,7 @@ export default function DispatchPanel({ mission, onDispatch, onCancel }) {
         <div>
           <div style={styles.sectionLabel}>Select Model</div>
           <div style={styles.modelsRow}>
-            {MODELS.map(m => (
+            {modelOptions.map(m => (
               <div
                 key={m.value}
                 className="dp-model-card"

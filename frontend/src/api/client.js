@@ -161,6 +161,7 @@ export const listRemoteControlSessions = () =>
 
 // ── Config ──
 export const getModels = () => request('/config/models');
+export const getModelOptions = () => request('/config/model-options');
 export const getToolPresets = () => request('/config/tool-presets');
 export const getMissionTypes = () => request('/config/mission-types');
 

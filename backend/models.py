@@ -34,6 +34,33 @@ PLANNER_MODEL = GATEWAY_SONNET_MODEL
 
 MODEL_CHOICES = [GATEWAY_OPUS_MODEL, GATEWAY_SONNET_MODEL, GATEWAY_HAIKU_MODEL]
 
+MODEL_OPTIONS = [
+    {
+        "value": GATEWAY_OPUS_MODEL,
+        "label": "GLM 5.1",
+        "tier": "high",
+        "icon": "\U0001F9E0",
+        "cost": "LiteLLM metered",
+        "tagline": "Maximum intelligence",
+    },
+    {
+        "value": GATEWAY_SONNET_MODEL,
+        "label": "HY3 Preview",
+        "tier": "mid",
+        "icon": "\u26A1",
+        "cost": "LiteLLM metered",
+        "tagline": "Speed meets smarts",
+    },
+    {
+        "value": GATEWAY_HAIKU_MODEL,
+        "label": "MiniMax M2.7",
+        "tier": "low",
+        "icon": "\U0001F680",
+        "cost": "LiteLLM metered",
+        "tagline": "Fast execution",
+    },
+]
+
 LEGACY_MODEL_ALIASES = {
     "claude-opus-4-6": GATEWAY_OPUS_MODEL,
     "claude-sonnet-4-6": GATEWAY_SONNET_MODEL,

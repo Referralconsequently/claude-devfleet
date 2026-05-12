@@ -13,7 +13,7 @@ from pydantic import BaseModel
 
 import db
 from models import (ProjectCreate, ProjectUpdate, MissionCreate, MissionUpdate,
-                    DispatchOptions, TOOL_PRESETS, MODEL_CHOICES,
+                    DispatchOptions, TOOL_PRESETS, MODEL_CHOICES, MODEL_OPTIONS,
                     ServiceCreate, ServiceUpdate, IncidentCreate, IncidentUpdate,
                     McpServerCreate, DEFAULT_MODEL, normalize_model)
 import health_checker
@@ -1723,6 +1723,12 @@ async def delete_incident(iid: str):
 async def get_models():
     """List available Claude models."""
     return MODEL_CHOICES
+
+
+@app.get("/api/config/model-options")
+async def get_model_options():
+    """List available dispatch model display metadata."""
+    return MODEL_OPTIONS
 
 
 @app.get("/api/config/tool-presets")
