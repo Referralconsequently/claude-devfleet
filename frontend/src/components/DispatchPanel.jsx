@@ -127,11 +127,16 @@ const styles = {
       overflow: 'hidden',
     };
   },
-  modelIcon: {
-    fontSize: 28,
-    lineHeight: 1,
-    marginBottom: 2,
-    filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))',
+  modelGraphic: (tier, size = 40) => {
+    const colors = { high: '#ef4444', mid: '#eab308', low: '#22c55e' };
+    return {
+      width: size,
+      height: size,
+      color: colors[tier] || '#eab308',
+      marginBottom: 2,
+      filter: 'drop-shadow(0 3px 8px rgba(0,0,0,0.35))',
+      flexShrink: 0,
+    };
   },
   modelName: {
     fontSize: 14,
@@ -286,6 +291,48 @@ const styles = {
   },
 };
 
+function ModelGraphic({ model, size = 40 }) {
+  const common = {
+    className: 'dp-model-graphic',
+    style: styles.modelGraphic(model.tier, size),
+    viewBox: '0 0 48 48',
+    fill: 'none',
+    xmlns: 'http://www.w3.org/2000/svg',
+    'aria-hidden': true,
+    focusable: false,
+  };
+
+  if (model.value === 'glm-5.1') {
+    return (
+      <svg {...common}>
+        <path d="M18 12c-4 0-7 3-7 7 0 1 .2 2 .6 2.9A8 8 0 0 0 16 37h16a8 8 0 0 0 4.4-14.7A7.5 7.5 0 0 0 26 13.2 9 9 0 0 0 18 12Z" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M18 23h12M18 30h14M24 16v21M31 19v18" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+        <circle cx="16" cy="23" r="2" fill="currentColor" />
+        <circle cx="32" cy="30" r="2" fill="currentColor" />
+      </svg>
+    );
+  }
+
+  if (model.value === 'minimax-m2.7') {
+    return (
+      <svg {...common}>
+        <path d="M30 6c6 2 10 6 12 12-4.5 1.2-8.2 3.8-11 7.8L22.2 17c4-2.8 6.6-6.5 7.8-11Z" fill="currentColor" opacity="0.18" />
+        <path d="M30 6c6 2 10 6 12 12-4.5 1.2-8.2 3.8-11 7.8L22.2 17c4-2.8 6.6-6.5 7.8-11Z" stroke="currentColor" strokeWidth="3" strokeLinejoin="round" />
+        <path d="M20 19 9 30l9 1 1 9 11-11" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+        <circle cx="34" cy="15" r="3" fill="currentColor" />
+        <path d="M12 35 7 40M18 38l-3 5M10 29l-5 3" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+      </svg>
+    );
+  }
+
+  return (
+    <svg {...common}>
+      <path d="M27 4 9 27h13l-3 17 20-25H26l1-15Z" fill="currentColor" opacity="0.18" />
+      <path d="M27 4 9 27h13l-3 17 20-25H26l1-15Z" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 /* CSS keyframes injected once */
 const styleTag = typeof document !== 'undefined' && (() => {
   const id = 'dispatch-panel-keyframes';
@@ -405,7 +452,7 @@ export default function DispatchPanel({ mission, onDispatch, onCancel }) {
                 style={styles.modelCard(model === m.value, m.tier)}
                 onClick={() => setModel(m.value)}
               >
-                <span style={styles.modelIcon}>{m.icon}</span>
+                <ModelGraphic model={m} />
                 <span style={styles.modelName}>{m.label.split(' (')[0]}</span>
                 <span style={styles.modelTagline}>{m.tagline}</span>
                 <span style={styles.modelCost(m.tier)}>{m.cost}</span>
