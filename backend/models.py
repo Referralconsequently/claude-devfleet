@@ -26,36 +26,50 @@ TOOL_PRESETS = {
     "fix": ["Read", "Write", "Edit", "Bash", "Grep", "Glob"],
 }
 
-GATEWAY_OPUS_MODEL = "glm-5.1"
-GATEWAY_SONNET_MODEL = "tencent/hy3-preview"
-GATEWAY_HAIKU_MODEL = "minimax-m2.7"
+GATEWAY_OPUS_MODEL = "chatgpt/gpt-5.5"
+GATEWAY_SONNET_MODEL = "glm-5.1"
+GATEWAY_HAIKU_MODEL = "tencent/hy3-preview"
+GATEWAY_MINIMAX_MODEL = "minimax-m2.7"
 GATEWAY_SMALL_FAST_MODEL = "gemini-3.1-flash-lite-preview"
 GATEWAY_CUSTOM_MODEL = "kimi-k2.6"
 DEFAULT_MODEL = GATEWAY_OPUS_MODEL
 PLANNER_MODEL = GATEWAY_SONNET_MODEL
 
-MODEL_CHOICES = [GATEWAY_OPUS_MODEL, GATEWAY_SONNET_MODEL, GATEWAY_HAIKU_MODEL]
+MODEL_CHOICES = [
+    GATEWAY_OPUS_MODEL,
+    GATEWAY_SONNET_MODEL,
+    GATEWAY_HAIKU_MODEL,
+    GATEWAY_MINIMAX_MODEL,
+]
 SUPPORTED_CAPABILITIES = "effort,thinking,adaptive_thinking,interleaved_thinking"
 
 MODEL_OPTIONS = [
     {
         "value": GATEWAY_OPUS_MODEL,
-        "label": "GLM 5.1",
+        "label": "ChatGPT GPT-5.5",
         "tier": "high",
         "icon": "\U0001F9E0",
         "cost": "LiteLLM metered",
-        "tagline": "Maximum intelligence",
+        "tagline": "Default xhigh reasoning",
     },
     {
         "value": GATEWAY_SONNET_MODEL,
-        "label": "HY3 Preview",
+        "label": "GLM 5.1",
         "tier": "mid",
         "icon": "\u26A1",
         "cost": "LiteLLM metered",
-        "tagline": "Speed meets smarts",
+        "tagline": "Sonnet alias",
     },
     {
         "value": GATEWAY_HAIKU_MODEL,
+        "label": "HY3 Preview",
+        "tier": "low",
+        "icon": "\U0001F680",
+        "cost": "LiteLLM metered",
+        "tagline": "Haiku alias",
+    },
+    {
+        "value": GATEWAY_MINIMAX_MODEL,
         "label": "MiniMax M2.7",
         "tier": "low",
         "icon": "\U0001F680",
@@ -98,7 +112,7 @@ def claude_code_gateway_env(model: Optional[str] = None) -> dict[str, str]:
         "ANTHROPIC_SMALL_FAST_MODEL": GATEWAY_SMALL_FAST_MODEL,
         "ANTHROPIC_CUSTOM_MODEL_OPTION": GATEWAY_CUSTOM_MODEL,
         "CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY": "1",
-        "CLAUDE_CODE_SUBAGENT_MODEL": GATEWAY_SONNET_MODEL,
+        "CLAUDE_CODE_SUBAGENT_MODEL": GATEWAY_HAIKU_MODEL,
         "ANTHROPIC_DEFAULT_OPUS_MODEL_SUPPORTED_CAPABILITIES": SUPPORTED_CAPABILITIES,
         "ANTHROPIC_DEFAULT_SONNET_MODEL_SUPPORTED_CAPABILITIES": SUPPORTED_CAPABILITIES,
         "ANTHROPIC_DEFAULT_HAIKU_MODEL_SUPPORTED_CAPABILITIES": SUPPORTED_CAPABILITIES,
