@@ -27,11 +27,15 @@ TOOL_PRESETS = {
 }
 
 GATEWAY_OPUS_MODEL = "chatgpt/gpt-5.5"
-GATEWAY_SONNET_MODEL = "glm-5.1"
-GATEWAY_HAIKU_MODEL = "tencent/hy3-preview"
+GATEWAY_SONNET_MODEL = "chatgpt/gpt-5.5-high"
+GATEWAY_HAIKU_MODEL = "chatgpt/gpt-5.5-medium"
+GATEWAY_GLM_MODEL = "glm-5.1"
+GATEWAY_HY3_MODEL = "tencent/hy3-preview"
 GATEWAY_MINIMAX_MODEL = "minimax-m2.7"
-GATEWAY_SMALL_FAST_MODEL = "gemini-3.1-flash-lite-preview"
-GATEWAY_CUSTOM_MODEL = "kimi-k2.6"
+GATEWAY_GEMINI_FLASH_LITE_MODEL = "gemini-3.1-flash-lite-preview"
+GATEWAY_SMALL_FAST_MODEL = "chatgpt/gpt-5.3-codex-spark"
+GATEWAY_KIMI_MODEL = "kimi-k2.6"
+GATEWAY_CUSTOM_MODEL = GATEWAY_HAIKU_MODEL
 DEFAULT_MODEL = GATEWAY_OPUS_MODEL
 PLANNER_MODEL = GATEWAY_SONNET_MODEL
 
@@ -39,7 +43,12 @@ MODEL_CHOICES = [
     GATEWAY_OPUS_MODEL,
     GATEWAY_SONNET_MODEL,
     GATEWAY_HAIKU_MODEL,
+    GATEWAY_SMALL_FAST_MODEL,
+    GATEWAY_GLM_MODEL,
+    GATEWAY_HY3_MODEL,
     GATEWAY_MINIMAX_MODEL,
+    GATEWAY_GEMINI_FLASH_LITE_MODEL,
+    GATEWAY_KIMI_MODEL,
 ]
 SUPPORTED_CAPABILITIES = "effort,thinking,adaptive_thinking,interleaved_thinking"
 
@@ -54,19 +63,43 @@ MODEL_OPTIONS = [
     },
     {
         "value": GATEWAY_SONNET_MODEL,
+        "label": "ChatGPT GPT-5.5 High",
+        "tier": "mid",
+        "icon": "\u26A1",
+        "cost": "LiteLLM metered",
+        "tagline": "Sonnet high-effort alias",
+    },
+    {
+        "value": GATEWAY_HAIKU_MODEL,
+        "label": "ChatGPT GPT-5.5 Medium",
+        "tier": "low",
+        "icon": "\U0001F680",
+        "cost": "LiteLLM metered",
+        "tagline": "Haiku and subagent medium-effort alias",
+    },
+    {
+        "value": GATEWAY_SMALL_FAST_MODEL,
+        "label": "ChatGPT GPT-5.3 Codex Spark",
+        "tier": "low",
+        "icon": "\U0001F680",
+        "cost": "LiteLLM metered",
+        "tagline": "SmallFast alias",
+    },
+    {
+        "value": GATEWAY_GLM_MODEL,
         "label": "GLM 5.1",
         "tier": "mid",
         "icon": "\u26A1",
         "cost": "LiteLLM metered",
-        "tagline": "Sonnet alias",
+        "tagline": "Available gateway model",
     },
     {
-        "value": GATEWAY_HAIKU_MODEL,
+        "value": GATEWAY_HY3_MODEL,
         "label": "HY3 Preview",
         "tier": "low",
         "icon": "\U0001F680",
         "cost": "LiteLLM metered",
-        "tagline": "Haiku alias",
+        "tagline": "Available gateway model",
     },
     {
         "value": GATEWAY_MINIMAX_MODEL,
@@ -75,6 +108,22 @@ MODEL_OPTIONS = [
         "icon": "\U0001F680",
         "cost": "LiteLLM metered",
         "tagline": "Fast execution",
+    },
+    {
+        "value": GATEWAY_GEMINI_FLASH_LITE_MODEL,
+        "label": "Gemini 3.1 Flash Lite",
+        "tier": "low",
+        "icon": "\U0001F680",
+        "cost": "LiteLLM metered",
+        "tagline": "Available gateway model",
+    },
+    {
+        "value": GATEWAY_KIMI_MODEL,
+        "label": "Kimi K2.6",
+        "tier": "mid",
+        "icon": "\u26A1",
+        "cost": "LiteLLM metered",
+        "tagline": "Available gateway model",
     },
 ]
 
